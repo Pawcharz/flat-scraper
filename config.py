@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # picks up .env in project root (gitignored)
+load_dotenv(".env.local")  # picks up .env.local in project root (gitignored)
 
 # ---------------------------------------------------------------------------
 # UPDATE OFFICE_LAT / OFFICE_LNG to your actual office before first use.
@@ -20,6 +20,6 @@ CITY: str = "Gdańsk"
 GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "")
 
 # Default filter values — can be overridden in the UI
-MAX_PRICE_PLN: int = 4500
+MAX_PRICE_PLN: int = 2000
 MIN_ROOMS: int = 1
-MAX_DISTANCE_KM: float = 2.0
+MAX_DISTANCE_KM: float = 3.0

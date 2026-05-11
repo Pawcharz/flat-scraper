@@ -5,6 +5,7 @@ Personal scraper for Gdańsk rental listings (OLX + Otodom). Filters by price, r
 ## Quick start
 
 ```bash
+cp .env.example .env.local   # add your GEMINI_API_KEY (optional)
 uv sync
 uv run streamlit run app.py
 ```
