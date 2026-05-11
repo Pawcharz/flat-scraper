@@ -5,14 +5,8 @@ Personal scraper for Gdańsk rental listings (OLX + Otodom). Filters by price, r
 ## Quick start
 
 ```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-streamlit run app.py
+uv sync
+uv run streamlit run app.py
 ```
 
 ## Configuration
