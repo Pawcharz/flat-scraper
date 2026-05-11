@@ -1,7 +1,10 @@
 """
 OLX source — HTML scraping with selectolax.
 Coordinates are not published by OLX; distance_km stays None for these listings.
-Rooms are inferred from title text when the explicit count isn't in the card.
+
+Two extraction modes:
+  use_gemini=False (default) — fast regex-based parsing (may miss fields)
+  use_gemini=True            — cleans cards and sends them to Gemini 2.5 Flash
 """
 
 import logging
@@ -116,9 +119,19 @@ def _parse_card(card) -> Optional[Listing]:
     )
 
 
-def fetch(pages: int = 2) -> list[Listing]:
-    """Fetch up to `pages` pages of OLX Gdańsk rental listings."""
+def fetch(pages: int = 2, use_gemini: bool = False) -> list[Listing]:
+    """Fetch up to `pages` pages of OLX Gdańsk rental listings.
+
+    Args:
+        pages:      number of search-result pages to scrape
+        use_gemini: when True, cards are cleaned and parsed by Gemini 2.5 Flash
+                    instead of the built-in regex parser
+    """
+    from cleaners.olx import clean_card
+    from extractors.gemini import extract_olx
+
     listings: list[Listing] = []
+    cleaned_cards: list[dict] = []   # accumulated for Gemini path
 
     with httpx.Client(headers=_HEADERS, follow_redirects=True) as client:
         for page_num in range(1, pages + 1):
@@ -140,10 +153,18 @@ def fetch(pages: int = 2) -> list[Listing]:
 
             log.info("OLX: page %d — %d cards", page_num, len(cards))
 
-            for card in cards:
-                lst = _parse_card(card)
-                if lst:
-                    listings.append(lst)
+            if use_gemini:
+                for card in cards:
+                    cleaned_cards.append(clean_card(card))
+            else:
+                for card in cards:
+                    lst = _parse_card(card)
+                    if lst:
+                        listings.append(lst)
+
+    if use_gemini:
+        log.info("OLX: sending %d cleaned cards to Gemini", len(cleaned_cards))
+        listings = extract_olx(cleaned_cards)
 
     log.info("OLX: total listings fetched: %d", len(listings))
     return listings

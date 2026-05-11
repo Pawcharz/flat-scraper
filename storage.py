@@ -29,6 +29,7 @@ def init_db() -> None:
                 source        TEXT NOT NULL,
                 title         TEXT,
                 price_pln     REAL,
+                czynsz_pln    REAL,
                 area_m2       REAL,
                 rooms         INTEGER,
                 lat           REAL,
@@ -42,6 +43,11 @@ def init_db() -> None:
                 fetched_at    TEXT NOT NULL DEFAULT (datetime('now'))
             )
         """)
+        # Migration: add czynsz_pln to existing databases that predate this column
+        try:
+            conn.execute("ALTER TABLE listings ADD COLUMN czynsz_pln REAL")
+        except sqlite3.OperationalError:
+            pass  # column already exists
         conn.commit()
 
 
@@ -57,12 +63,12 @@ def save_listings(listings: list[Listing]) -> int:
             if exists:
                 conn.execute(
                     """UPDATE listings SET
-                        title=?, price_pln=?, area_m2=?, rooms=?,
+                        title=?, price_pln=?, czynsz_pln=?, area_m2=?, rooms=?,
                         lat=?, lng=?, thumbnail_url=?, posted_at=?,
                         distance_km=?, nearest_tram_m=?, nearest_bus_m=?
                     WHERE url=?""",
                     (
-                        lst.title, lst.price_pln, lst.area_m2, lst.rooms,
+                        lst.title, lst.price_pln, lst.czynsz_pln, lst.area_m2, lst.rooms,
                         lst.lat, lst.lng, lst.thumbnail_url, lst.posted_at,
                         lst.distance_km, lst.nearest_tram_m, lst.nearest_bus_m,
                         lst.url,
@@ -71,12 +77,12 @@ def save_listings(listings: list[Listing]) -> int:
             else:
                 conn.execute(
                     """INSERT INTO listings
-                        (url, source, title, price_pln, area_m2, rooms,
+                        (url, source, title, price_pln, czynsz_pln, area_m2, rooms,
                          lat, lng, thumbnail_url, posted_at,
                          distance_km, nearest_tram_m, nearest_bus_m, seen)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (
-                        lst.url, lst.source, lst.title, lst.price_pln,
+                        lst.url, lst.source, lst.title, lst.price_pln, lst.czynsz_pln,
                         lst.area_m2, lst.rooms, lst.lat, lst.lng,
                         lst.thumbnail_url, lst.posted_at,
                         lst.distance_km, lst.nearest_tram_m, lst.nearest_bus_m,

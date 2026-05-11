@@ -14,6 +14,7 @@ class Listing:
     lng: Optional[float]
     thumbnail_url: Optional[str]
     posted_at: Optional[str]          # ISO-8601 string, source-provided
+    czynsz_pln: Optional[float] = field(default=None)  # building maintenance fee on top of rent
     # enriched fields — None until enrich.py runs
     distance_km: Optional[float] = field(default=None)
     nearest_tram_m: Optional[int] = field(default=None)

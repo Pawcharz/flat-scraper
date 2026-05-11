@@ -45,6 +45,18 @@ with st.sidebar:
         value=2, step=1,
         help="Each Otodom page ≈ 37 listings, each OLX page ≈ 52.",
     )
+    gemini_enabled = st.toggle(
+        "Use Gemini parser for OLX",
+        value=False,
+        help=(
+            "Sends cleaned OLX card text to Gemini 2.5 Flash for extraction. "
+            "Slower but more accurate — parses rooms, czynsz, and titles reliably. "
+            "Requires GEMINI_API_KEY in .env."
+        ),
+        disabled=not bool(config.GEMINI_API_KEY),
+    )
+    if not config.GEMINI_API_KEY:
+        st.caption("⚠️ Set GEMINI_API_KEY in .env to enable Gemini parser.")
     st.caption(
         f"Office coords: {config.OFFICE_LAT}, {config.OFFICE_LNG}  \n"
         "_(edit config.py to change)_"
@@ -56,8 +68,8 @@ with st.sidebar:
 if st.button("🔄 Refresh listings", type="primary"):
     with st.spinner("Fetching Otodom…"):
         otodom_listings = otodom.fetch(pages=pages_to_fetch)
-    with st.spinner("Fetching OLX…"):
-        olx_listings = olx.fetch(pages=pages_to_fetch)
+    with st.spinner(f"Fetching OLX {'(Gemini)' if gemini_enabled else ''}…"):
+        olx_listings = olx.fetch(pages=pages_to_fetch, use_gemini=gemini_enabled)
 
     all_listings = otodom_listings + olx_listings
 
@@ -109,10 +121,17 @@ else:
                     st.markdown("_(no image)_")
 
             with cols[1]:
-                price_str = f"**{int(row['price_pln'])} PLN/mo**" if row.get("price_pln") else "price unknown"
-                area_str = f"{row['area_m2']} m²" if row.get("area_m2") else "?"
+                # Price + czynsz
+                if row.get("price_pln"):
+                    price_str = f"**{int(row['price_pln'])} PLN/mo**"
+                    if row.get("czynsz_pln"):
+                        price_str += f" + {int(row['czynsz_pln'])} czynsz"
+                else:
+                    price_str = "price unknown"
+
+                area_str  = f"{row['area_m2']} m²" if row.get("area_m2") else "?"
                 rooms_str = str(row["rooms"]) if row.get("rooms") else "?"
-                dist_str = (
+                dist_str  = (
                     f"{row['distance_km']:.1f} km"
                     if row.get("distance_km") is not None
                     else "no coords"
