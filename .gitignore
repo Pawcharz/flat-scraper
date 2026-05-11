@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.pytest_cache/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Output (keep .gitkeep, ignore generated files)
+output/*.html
+output/*.json
