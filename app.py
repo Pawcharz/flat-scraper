@@ -38,6 +38,13 @@ with st.sidebar:
         "Max distance to office (km)", min_value=0.5, max_value=15.0,
         value=config.MAX_DISTANCE_KM, step=0.5,
     )
+    st.divider()
+    st.header("Scraping")
+    pages_to_fetch = st.number_input(
+        "Pages per site", min_value=1, max_value=20,
+        value=2, step=1,
+        help="Each Otodom page ≈ 37 listings, each OLX page ≈ 52.",
+    )
     st.caption(
         f"Office coords: {config.OFFICE_LAT}, {config.OFFICE_LNG}  \n"
         "_(edit config.py to change)_"
@@ -48,9 +55,9 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 if st.button("🔄 Refresh listings", type="primary"):
     with st.spinner("Fetching Otodom…"):
-        otodom_listings = otodom.fetch(pages=2)
+        otodom_listings = otodom.fetch(pages=pages_to_fetch)
     with st.spinner("Fetching OLX…"):
-        olx_listings = olx.fetch(pages=2)
+        olx_listings = olx.fetch(pages=pages_to_fetch)
 
     all_listings = otodom_listings + olx_listings
 
