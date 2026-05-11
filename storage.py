@@ -129,3 +129,12 @@ def mark_seen(url: str) -> None:
     with _connect() as conn:
         conn.execute("UPDATE listings SET seen=1 WHERE url=?", (url,))
         conn.commit()
+
+
+def clear_db() -> int:
+    """Delete all listings. Returns number of rows removed."""
+    with _connect() as conn:
+        n = conn.execute("SELECT COUNT(*) FROM listings").fetchone()[0]
+        conn.execute("DELETE FROM listings")
+        conn.commit()
+    return n

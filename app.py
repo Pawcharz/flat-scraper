@@ -56,7 +56,13 @@ with st.sidebar:
         disabled=not bool(config.GEMINI_API_KEY),
     )
     if not config.GEMINI_API_KEY:
-        st.caption("⚠️ Set GEMINI_API_KEY in .env to enable Gemini parser.")
+        st.caption("⚠️ Set GEMINI_API_KEY in .env.local to enable Gemini parser.")
+    st.divider()
+    st.header("Database")
+    if st.button("🗑️ Reset database", help="Deletes all stored listings so the next refresh starts clean."):
+        n = storage.clear_db()
+        st.success(f"Deleted {n} listings.")
+        st.rerun()
     st.caption(
         f"Office coords: {config.OFFICE_LAT}, {config.OFFICE_LNG}  \n"
         "_(edit config.py to change)_"

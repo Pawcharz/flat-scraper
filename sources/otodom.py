@@ -81,10 +81,16 @@ def _parse_item(item: dict, lat: Optional[float], lng: Optional[float]) -> Listi
     slug = item.get("slug", "")
     url = f"{_BASE}/pl/oferta/{slug}"
 
+    # totalPrice = asking rent; rentPrice = czynsz/admin fee on top
     price = None
     total = item.get("totalPrice") or {}
     if total.get("value"):
         price = float(total["value"])
+
+    czynsz = None
+    rent_price = item.get("rentPrice") or {}
+    if rent_price.get("value"):
+        czynsz = float(rent_price["value"])
 
     area = item.get("areaInSquareMeters")
     if area is not None:
@@ -103,6 +109,7 @@ def _parse_item(item: dict, lat: Optional[float], lng: Optional[float]) -> Listi
         source="otodom",
         title=item.get("title", ""),
         price_pln=price,
+        czynsz_pln=czynsz,
         area_m2=area,
         rooms=rooms,
         lat=lat,
